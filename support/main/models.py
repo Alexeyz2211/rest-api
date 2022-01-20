@@ -28,7 +28,7 @@ class Ticket(models.Model):
         (2, 'Solved'),
         (3, 'Freezed'),
     ]
-    status = models.CharField('Ticket_status', max_length=12, choices=TICKET_STATUS, default=1)
+    status = models.CharField('Ticket_status', max_length=12, choices=TICKET_STATUS, default=TICKET_STATUS[0])
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name='User',

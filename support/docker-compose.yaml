@@ -5,6 +5,28 @@ services:
     image: redis
     restart: always
 
+  djdb:
+    image: postgres:14.0-alpine
+    container_name: djdb
+    environment:
+      - POSTGRES_DB=djdb
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=user
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data/
+
+  worker:
+    build: .
+    command: ["celery", "-A", "support", "worker", "-l", "info"]
+    volumes:
+      - .:/app
+    depends_on:
+      - main
+      - redis
+
+
   main:
     restart: always
     build:
@@ -17,26 +39,6 @@ services:
     depends_on:
       - djdb
       - redis
-
-  worker:
-    build: .
-    command: ["celery", "-A", "support", "worker", "-l", "info"]
-    volumes:
-      - .:/app
-    depends_on:
-      - main
-      - redis
-  djdb:
-    image: postgres:14.0-alpine
-    container_name: djdb
-    environment:
-      - POSTGRES_DB=djdb
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=user
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_volume:/var/lib/postgresql/data/
 
 volumes:
   postgres_volume:
