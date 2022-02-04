@@ -12,6 +12,6 @@ def on_post_save(instance: models.Message, created: bool, **kwargs: Dict[str, An
     if created:
         users = models.Message.objects.filter(ticket__message=instance.id)
         users_id = set([u.user.id for u in users])
-        for i in users_id:
-            if instance.user.id != i:
-                send_email_notice(i, instance.user, instance.text)
+        for user_id in users_id:
+            if instance.user.id != user_id:
+                send_email_notice(user_id, instance.user.username, instance.text)

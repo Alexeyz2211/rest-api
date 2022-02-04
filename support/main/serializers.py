@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from . import models
-from .models import Ticket
 
 
 class TicketDetailSerializer(serializers.ModelSerializer):
@@ -36,6 +35,14 @@ class TicketStatusSerializer(serializers.ModelSerializer):
         model = models.Ticket
         fields = ('id', 'name', 'description', 'status')
         read_only_fields = ('id', 'name', 'description')
+
+
+class TicketAssigneeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Ticket
+        fields = ('id', 'name', 'description', 'status', 'assignee')
+        read_only_fields = ('id', 'name', 'description', 'status')
 
 
 class MessageDetailSerializer(serializers.ModelSerializer):
