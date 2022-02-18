@@ -2,7 +2,6 @@ from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
 
 from authentication.models import User
 from . import serializers
@@ -19,7 +18,11 @@ class TicketCreateView(generics.CreateAPIView):
 
 
 class TicketListView(generics.ListAPIView):
-    queryset = models.Ticket.objects.all()
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return models.Ticket.objects.all()
+        return models.Ticket.objects.filter(user_id=self.request.user.id)
 
     def get_serializer_class(self):
         if self.request.user.is_staff:
@@ -37,25 +40,6 @@ class TicketStatusView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAdminUser]
     queryset = models.Ticket.objects.all()
 
-    def update(self, request,  *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        self.request.data['status'] = self.request.data['status'].upper()
-        if serializer.is_valid():
-            self.perform_update(serializer)
-
-            if getattr(instance, '_prefetched_objects_cache', None):
-                # If 'prefetch_related' has been applied to a queryset, we need to
-                # forcibly invalidate the prefetch cache on the instance.
-                instance._prefetched_objects_cache = {}
-
-            return Response(serializer.data)
-        else:
-            raise ValidationError(
-                f'{request.data["status"]} is not a valid choice. Must be {models.Ticket.StatusInTicket.choices}'
-            )
-
 
 class TicketAssigneeView(generics.RetrieveUpdateAPIView):
     serializer_class = serializers.TicketAssigneeSerializer
@@ -63,15 +47,21 @@ class TicketAssigneeView(generics.RetrieveUpdateAPIView):
     queryset = models.Ticket.objects.all()
 
     def perform_update(self, serializer):
-        """Сhek that the assignee is an employee"""
         support_id = self.request.data['assignee']
+        inform_message = f'{User.objects.get(pk=support_id)} assigned for your Ticket'
         if User.objects.get(pk=support_id).is_staff:
             serializer.save()
-            send_email_notice(
+            send_email_notice.delay(
                 User.objects.get(tickets=serializer.data['id']).id,
                 self.request.user.username,
-                f'{User.objects.get(pk=support_id)} assigned for your Ticket'
+                inform_message
             )
+            message = models.Message(
+                text=inform_message,
+                ticket_id=self.kwargs['pk'],
+                user_id=support_id
+            )
+            message.save()
         else:
             raise ValidationError('The assignee must be an Employee')
 

@@ -14,4 +14,4 @@ def on_post_save(instance: models.Message, created: bool, **kwargs: Dict[str, An
         users_id = set([u.user.id for u in users])
         for user_id in users_id:
             if instance.user.id != user_id:
-                send_email_notice(user_id, instance.user.username, instance.text)
+                send_email_notice.delay(user_id, instance.user.username, instance.text)

@@ -14,5 +14,3 @@ def send_email_notice(user_id, sender_email, text):
         EMAIL_HOST_USER,
         user
     )
-    return None
-

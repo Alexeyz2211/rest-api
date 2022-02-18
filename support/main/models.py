@@ -26,8 +26,8 @@ class Ticket(models.Model):
         SOLVED = 'SL', 'Solved'
         FREEZED = 'FR', 'Freezed'
 
-    name = models.CharField('Ticket_name', max_length=128, null=True)
-    description = models.TextField('Ticket_description', null=True)
+    name = models.CharField('Ticket_name', max_length=128, null=False)
+    description = models.TextField('Ticket_description', null=False)
     date_create = models.DateTimeField(auto_now_add=True,)
     status = models.CharField(
         'Ticket_status',

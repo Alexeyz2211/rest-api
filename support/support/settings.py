@@ -13,6 +13,8 @@ import datetime
 import os
 from pathlib import Path
 
+from support.utils import parse_bool
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from django.core.exceptions import ImproperlyConfigured
@@ -26,12 +28,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# if not os.getenv('SECRET_KEY'):
-#     raise ImproperlyConfigured('SECRET_KEY is not configured')
+if not os.getenv('SECRET_KEY'):
+    raise ImproperlyConfigured('SECRET_KEY is not configured')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG')
+DEBUG = parse_bool(os.getenv("DJANGO_DEBUG"))
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(' ')
 
@@ -129,17 +131,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'djdb',
-#         'USER': 'username',
-#         'PASSWORD': 'user',
-#         'HOST': 'djdb',
-#         'PORT': '5432',
-#     }
-# }
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -185,8 +176,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
