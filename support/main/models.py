@@ -8,7 +8,7 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         null=True
     )
-    text = models.TextField('Text message', null=True)
+    text = models.TextField('Text message', null=False)
     date = models.DateTimeField(auto_now_add=True)
     ticket = models.ForeignKey(
         'Ticket',

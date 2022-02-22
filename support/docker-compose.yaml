@@ -7,11 +7,9 @@ services:
 
   djdb:
     image: postgres:14.0-alpine
-    container_name: djdb
-    environment:
-      - POSTGRES_DB=djdb
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=user
+    container_name: db
+    env_file:
+      - .env
     ports:
       - "5433:5432"
     volumes:
@@ -37,7 +35,7 @@ services:
       - '8000:8000'
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     depends_on:
-      - djdb
+      - db
       - redis
 
 volumes:

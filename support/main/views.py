@@ -4,10 +4,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 
 from authentication.models import User
-from . import serializers
-from . import models
-from .permissions import IsOwner
-from .tasks import send_email_notice
+from main import serializers
+from main import models
+from main.permissions import IsOwner
+from main.tasks import send_email_notice
 
 
 class TicketCreateView(generics.CreateAPIView):
@@ -48,7 +48,7 @@ class TicketAssigneeView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         support_id = self.request.data['assignee']
-        inform_message = f'{User.objects.get(pk=support_id)} assigned for your Ticket'
+        inform_message = f'{User.objects.get(pk=support_id).username} assigned for your Ticket'
         if User.objects.get(pk=support_id).is_staff:
             serializer.save()
             send_email_notice.delay(
