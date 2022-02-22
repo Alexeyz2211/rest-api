@@ -10,9 +10,9 @@ client = APIClient()
 
 
 @pytest.mark.django_db
-def test_all_tickets_usual_user(usual_user, support_user):
-    user_ticket = Ticket.objects.create(name='user_ticket', user=usual_user)
-    Ticket.objects.create(name='staff_ticket', user=support_user)
+def test_all_tickets_usual_user(usual_user, users_ticket_created, supports_ticket_created):
+    user_ticket = users_ticket_created
+    supports_ticket_created
     client.force_authenticate(usual_user)
     response = client.get(reverse('support:ticket-all'))
 
@@ -22,9 +22,9 @@ def test_all_tickets_usual_user(usual_user, support_user):
 
 
 @pytest.mark.django_db
-def test_all_tickets_support_user(usual_user, support_user):
-    supports_ticket = Ticket.objects.create(name='staff_ticket', user=support_user)
-    users_ticket = Ticket.objects.create(name='user_ticket', user=usual_user)
+def test_all_tickets_support_user(support_user, users_ticket_created, supports_ticket_created):
+    supports_ticket = supports_ticket_created
+    users_ticket = users_ticket_created
     client.force_authenticate(support_user)
     response = client.get(reverse('support:ticket-all'))
 
@@ -89,6 +89,8 @@ def test_create_ticket_usual_user(usual_user):
         'user_id': usual_user.id
     }
     client.post(reverse('support:ticket-create'), context, format='json')
+
+    assert len(Ticket.objects.all()) == 1
     response = client.get(reverse('support:ticket-all'))
 
     assert response.status_code == 200
